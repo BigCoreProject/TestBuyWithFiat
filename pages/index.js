@@ -1,158 +1,55 @@
-import {
-  ConnectWallet,
-  useAddress,
-  useContract,
-  useContractRead,
-  useContractWrite,
-  useTokenBalance,
-  Web3Button,
-} from "@thirdweb-dev/react";
-
-import { ethers } from "ethers";
-
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import styles from "../styles/Home.module.css";
-import { stakingContractAddress } from "../const/yourDetails";
 
 export default function Home() {
-  const address = useAddress();
-  const [amountToStake, setAmountToStake] = useState(0);
-
-  // Initialize all the contracts
-  const { contract: staking, isLoading: isStakingLoading } = useContract(
-    stakingContractAddress,
-    "custom"
-  );
-
-  // Get contract data from staking contract
-  const { data: rewardTokenAddress } = useContractRead(staking, "rewardToken");
-  const { data: stakingTokenAddress } = useContractRead(
-    staking,
-    "stakingToken"
-  );
-
-  // Initialize token contracts
-  const { contract: stakingToken, isLoading: isStakingTokenLoading } =
-    useContract(stakingTokenAddress, "token");
-  const { contract: rewardToken, isLoading: isRewardTokenLoading } =
-    useContract(rewardTokenAddress, "token");
-
-  // Token balances
-  const { data: stakingTokenBalance, refetch: refetchStakingTokenBalance } =
-    useTokenBalance(stakingToken, address);
-  const { data: rewardTokenBalance, refetch: refetchRewardTokenBalance } =
-    useTokenBalance(rewardToken, address);
-
-  // Get staking data
-  const {
-    data: stakeInfo,
-    refetch: refetchStakingInfo,
-    isLoading: isStakeInfoLoading,
-  } = useContractRead(staking, "getStakeInfo", [address || "0"]);
-
-  useEffect(() => {
-    setInterval(() => {
-      refetchData();
-    }, 10000);
-  }, []);
-
-  const refetchData = () => {
-    refetchRewardTokenBalance();
-    refetchStakingTokenBalance();
-    refetchStakingInfo();
-  };
-
   return (
     <div className={styles.container}>
-      <main className={styles.main}>
-        <h1 className={styles.title}>Welcome to staking app!</h1>
-
-        <p className={styles.description}>
-          Stake certain amount and get reward tokens back!
-        </p>
-
-        <div className={styles.connect}>
-          <ConnectWallet />
+      <div className={styles.content}>
+        <div className={styles.hero}>
+          <div className={styles.heroBackground}>
+            <div className={styles.heroBackgroundInner}>
+              <Image
+                src="/bg.png"
+                width={1000}
+                height={1500}
+                alt="Background"
+                quality={100}
+                className={styles.gradient}
+              />
+            </div>
+          </div>
+          <div className={styles.heroAssetFrame}></div>
+          <div className={styles.heroBodyContainer}>
+            <div className={styles.heroBody}>
+              <h1 className={styles.heroTitle}>
+                <span className={styles.heroTitleGradient}>
+                  Sinbad Staking Platform
+                </span>
+              </h1>
+              <p>
+                Sail the Crypto Seas with Sinbad and unlock the potential of the Sinbad Staking Platform.
+              </p>
+              <p>
+                Join our community and stake your <b>Sinbad</b> tokens to earn lucrative <b>USDT</b> rewards.
+              </p>
+              <p>
+                Explore seamless trading experiences with $Sinbad on DodoEx, the decentralized exchange built on the Polygon network.
+              </p>
+              <div className={styles.heroCtaContainer}>
+                <Link className={styles.heroCta} href="https://app.dodoex.io/swap/network/polygon/137-MATIC/137-Sinbad">
+                  Buy $Sinbad Now!
+                </Link>
+              </div>
+              <div className={styles.heroCtaContainer}>
+                <Link className={styles.heroCta} href="/about">
+                  Explore Sinbad Token
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div className={styles.stakeContainer}>
-          <input
-            className={styles.textbox}
-            type="number"
-            value={amountToStake}
-            onChange={(e) => setAmountToStake(e.target.value)}
-          />
-
-          <Web3Button
-            className={styles.button}
-            contractAddress={stakingContractAddress}
-            action={async (contract) => {
-              await stakingToken.setAllowance(
-                stakingContractAddress,
-                amountToStake
-              );
-              await contract.call(
-                "stake",
-                [ethers.utils.parseEther(amountToStake)]
-              );
-              alert("Tokens staked successfully!");
-            }}
-          >
-            Stake!
-          </Web3Button>
-
-          <Web3Button
-            className={styles.button}
-            contractAddress={stakingContractAddress}
-            action={async (contract) => {
-              await contract.call(
-                "withdraw",
-                [ethers.utils.parseEther(amountToStake)]
-              );
-              alert("Tokens unstaked successfully!");
-            }}
-          >
-            Unstake!
-          </Web3Button>
-
-          <Web3Button
-            className={styles.button}
-            contractAddress={stakingContractAddress}
-            action={async (contract) => {
-              await contract.call("claimRewards", []);
-              alert("Rewards claimed successfully!");
-            }}
-          >
-            Claim rewards!
-          </Web3Button>
-        </div>
-
-        <div className={styles.grid}>
-          <a className={styles.card}>
-            <h2>Stake token balance</h2>
-            <p>{stakingTokenBalance?.displayValue}</p>
-          </a>
-
-          <a className={styles.card}>
-            <h2>Reward token balance</h2>
-            <p>{rewardTokenBalance?.displayValue}</p>
-          </a>
-
-          <a className={styles.card}>
-            <h2>Staked amount</h2>
-            <p>
-              {stakeInfo && ethers.utils.formatEther(stakeInfo[0].toString())}
-            </p>
-          </a>
-
-          <a className={styles.card}>
-            <h2>Current reward</h2>
-            <p>
-              {stakeInfo && ethers.utils.formatEther(stakeInfo[1].toString())}
-            </p>
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
-}
+};
